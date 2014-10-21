@@ -1,0 +1,420 @@
+#:import color kivy.utils.get_color_from_hex
+#:import sp kivy.metrics.sp
+#:set title_color '009688'
+#:set title_underline 'b2dfdb'
+#:set subtitle_color '00bcd4'
+#:set subtitle_underline 'b2ebf2'
+#:set default_color (0, 0, 0, 1)
+#:set background_color 'e0f7fa'
+#:set content_color '000000'
+
+<Title@Label>
+    size_hint_y: None
+    height: self.texture_size[1] + sp(20)
+    color1: title_color
+    color2: title_underline
+    font_size: sp(25)
+    canvas.before:
+        Color:
+            rgba: color(root.color1) if root.color1 else default_color
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        Color:
+            rgba: color(root.color2) if root.color2 else default_color
+        Rectangle:
+            pos: self.pos
+            size: self.width, sp(5)
+
+<SubTitle@FloatLayout+Title>:
+    color1: subtitle_color
+    color2: subtitle_underline
+
+<PresButton@ButtonBehavior+SubTitle>:
+    font_name: 'LinLibertine_R.ttf'
+
+<ContentLabel@Label>:
+    color: color(content_color)
+    font_size: sp(32)
+    size: self.texture_size
+    size_hint_y: None
+    font_name: 'LinLibertine_R.ttf'
+
+<CodeLabel@Label>
+    code: ''
+    font_name: 'UbuntuMono-R.ttf'
+    text: self.code .replace('\t', ' ' * 4)
+    # color: 1, 1, 1, 1
+    font_size: sp(20)
+    canvas.before:
+        Color:
+            rgba: 0, 0, 0, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        # Color:
+        #     rgba: 1, 1, 1, 1
+
+
+<Spacer@Widget>
+
+BoxLayout:
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: color(background_color)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    Title:
+        text: 'Présentation Kivy - LeLoops - 19/10/2014'
+    SubTitle:
+        text: sm.current
+        PresButton:
+            pos_hint: {'center_y': .5, 'x': 0}
+            size_hint_x: None
+            width: self.height
+            text: '←'
+            on_press:
+                sm.transition.direction = 'right'
+                sm.current = sm.previous()
+        PresButton:
+            pos_hint: {'center_y': .5, 'right': 1}
+            size_hint_x: None
+            width: self.height
+            text: '→'
+            on_press:
+                sm.transition.direction = 'left'
+                sm.current = sm.next()
+
+    ScreenManager:
+        id: sm
+        Screen:
+            name: 'Présentation'
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''Gabriel Pettier
+                        Développeur python
+                        Contributeur puis Core-Développeur Kivy depuis 2010
+                         
+                        http://tshirtman.fr
+                        http://github.com/tshirtman
+                        http://twitter.com/tshirtman
+                         
+                        http://tangibledisplay.com
+                        Développement d'interactions tangibles
+                        '''
+                Widget
+        Screen:
+            name: 'Kivy'
+            BoxLayout:
+                orientation: 'vertical'
+                FloatLayout:
+                    id: logo_container
+                    size_hint_y: None
+                    height: logo.texture_size[1] * 2
+                    Scatter:
+                        size_hint: None, None
+                        size: logo.size
+                        center: logo_container.center
+                        Image:
+                            id: logo
+                            size: self.texture_size
+                            source: 'data/logo/kivy-icon-256.png'
+
+                ContentLabel:
+                    text:
+                        '''Bibliothèque de Widgets orientés multitouch
+                        ‣ Développé majoritairement en pur Python, le reste en
+                        Cython pour les performances.
+
+                        ‣ Multiplatforme: Windows, OSX, Linux, Android et IOS
+                        supportés.
+
+                        ‣ API graphique directement basée sur  OpenGL ES 2.0.
+
+                        ‣ Projet Libre et collaboratif, licence MIT.
+                        '''
+                Spacer
+        Screen:
+            name: 'Concepts'
+            GridLayout:
+                size_hint: 1, None
+                pos_hint: {'center': (.5, .5)}
+                size_hint: .5, 1
+                cols: 1
+                height: self.minimum_height
+                ContentLabel:
+                    text_size: self.width, None
+                    text:
+                        """
+                        ‣ Instruction
+                        → Permet d'indiquer un ordre au GPU
+                        """
+                ContentLabel:
+                    text_size: self.width, None
+                    text:
+                        """
+                        ‣ Évènement
+                        → Propage une information à tous les acteurs concernés
+                        """
+                Spacer
+        Screen:
+            name: 'Instruction exemple'
+
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    CodeLabel:
+                        code:
+                            '''
+                            with widget.canvas:
+                            \tColor(1, 0, 0, 1, mode='rgba')
+                            \tRectangle(pos=widget.pos, size=widget.size)
+                            \tColor(.5, .5, .5, 1, mode='rgba')
+                            \tEllipse(pos=widget.pos, size=widget.size)
+                            '''
+                    Widget:
+                        canvas:
+                            Color:
+                                rgba: 1, 0, 0, 1
+                            Rectangle:
+                                size: self.size
+                                pos: self.pos
+                            Color:
+                                rgba: .5, .5, .5, 1
+                            Ellipse:
+                                pos: self.pos
+                                size: self.size
+        Screen:
+            name: 'Évènement'
+            BoxLayout:
+                CodeLabel:
+                    code:
+                        '''
+                        def function(*args):
+                        \tprint(args)
+                         
+                        widget.bind(on_touch_down, function)
+                        '''
+                ContentLabel:
+                    text: 'touch me\n'
+                    font_size: 15
+                    text_size: self.width, None
+                    on_touch_down: self.text += '\n%s' % (','.join(str(x) for x in args))
+
+        Screen:
+            name: 'Properties'
+
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''Permet de lier les attributs des objets à des
+                        évènements.
+                        ‣ StringProperty
+                        ‣ NumericProperty
+                        ‣ ObjectProperty
+                        ‣ AliasProperty
+                        ‣ etc…
+
+                        Doit être déclaré sur des sous-classes d'EventDispatcher,
+                        qui implémentent le pattern "Observer". Ainsi, il est
+                        possible à l'objet de réaliser des actions quand ses
+                        propriétés changent de valeur.
+                        '''
+                Widget:
+
+        Screen:
+            name: 'Widgets'
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        ‣ Hérite d'EventDispatcher
+                        ‣ Contient un Canvas (groupe d'instructions).
+
+                        Propose un certain nombre d'évènements par défaut,
+                        notemment:
+                        ‣ on_touch_down
+                        ‣ on_touch_move
+                        ‣ on_touch_up
+
+                        Le branchement (binding) des instructions graphiques et
+                        leur mises à jours sur les évènements (directs ou via
+                        des properties) permet de déléguer la mise à jours du
+                        widget au système d'évènement.
+                        '''
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            class MyWidget(Widget):
+                            \tactive = BooleanProperty(False)
+                             
+                            \tdef __init__(self, **kwargs):
+                            \t\tsuper(MyWidget, self).__init__(**kwargs)
+                            \t\twith self.canvas:
+                            \t\t\tColor(1, 1, 1, 1, mode='rgba')
+                            \t\t\tRectangle(pos=self.pos, size=self.size)
+                             
+                            \tdef on_active(self, active):
+                            \t\tif self.active:
+                            \t\t\tself.color.rgba = (.5, .5, 0, 1)
+                            \t\telse:
+                            \t\t\tself.coler.rgba = (1, 1, 1, 1)
+                             
+                            \tdef on_touch_down(self, touch):
+                            \t\tif self.collide_point(*touch.pos):
+                            \t\t\tself.active = not self.active
+                            '''
+                    Widget:
+                        active: False
+                        on_touch_down:
+                            if self.collide_point(*args[1].pos): self.active = not self.active
+                        canvas:
+                            Color:
+                                rgba: (.5, .5, 0, 1) if self.active else (1, 1, 1, 1)
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
+        Screen:
+            name: 'Layouts'
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        Les Widgets sont par défaut complètement libres de leur
+                        placement et de leur tailles, qui sont absolues (origine
+                        bas-gauche de l'écran).
+                         
+                        Certains widgets sont spécialisés dans le placement et le
+                        dimensionnement de leurs sous widgets (enfants).
+                         
+                        ‣ FloatLayout
+                        ‣ BoxLayout
+                        ‣ AnchorLayout
+                        ‣ GridLayout
+                        ‣ StackLayout
+                        ‣ etc…
+                        '''
+                Widget
+        Screen:
+            name: 'Le language KV'
+
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        Bien que très commode pour la logique métiers, le python est peu
+                        adapté à la déclaration d'éléments d'interfaces et de leurs
+                        liaisons logiques.
+                         
+                        L'idée d'un language déclaratif est de rendre bien plus
+                        concis et lisible l'expression d'une interface. De
+                        plus, le parsing des règles permet d'automatiser les
+                        branchements de mises à jours sur les propriétés
+                        utilisés dans leur déclaration.
+                         
+                        Cette concision d'expression est surtout payante l'ors
+                        de l'imbrication de widgets, avec des dépendances de
+                        comportement ou de représentation à divers niveaux.
+                        '''
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            Widget:
+                            \tcanvas:
+                            \t\tColor:
+                            \t\t\trgba: 1, 0, 1, 1
+                            \t\tRectangle:
+                            \t\t\tpos: self.pos
+                            \t\t\tsize: self.size
+                            '''
+                    ContentLabel:
+                        text: 'vs'
+                        size_hint_x: None
+                        width: self.texture_size[0] * 2
+                        pos_hint: {'center_y': .5}
+
+                    CodeLabel:
+                        text:
+                            '''
+                            w = Widget()
+                            with w.canvas:
+                            \tColor(1, 0, 1, 1, mode='rgba')
+                            \trect = Rectangle(pos=w.pos, size=w.size)
+                            def update(self, *args):
+                            \trect.pos = w.pos
+                            \trect.size = w.size
+                            w.bind(pos=update, size=update)
+                            '''
+                Widget
+        Screen:
+            name: 'Le language KV - 2'
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        Règles et classes dynamiques:
+
+                        2 types de règles:
+                        ‣ root rule: une seule permise dans un fichier à parser,
+                        sera retourné comme widget de base par le parseur
+                        '''
+                CodeLabel:
+                    text:
+                        '''
+                        MyWidget:
+                        \tLabel:
+                        \t\ttext: 'example'
+                        '''
+
+                ContentLabel:
+                    text:
+                        '''
+                        ‣ widget rule: Autant qu'on veut, permet de déclarer la
+                        représentation/le contenus de base de toutes les
+                        instances d'une classe déclaré en python.
+                        '''
+                CodeLabel:
+                    text:
+                        '''
+                        <Widget>:
+                        \tLabel:
+                        \t\ttext: 'example'
+                        '''
+
+                ContentLabel:
+                    text:
+                        '''
+                        Un cas particulier du second type, la dynamic class,
+                        permet de créer une classe spécifique du coté KV, sans
+                        la déclarer en python, simplement en déclarant
+                        l'héritage avec '@'
+                        '''
+
+                CodeLabel:
+                    text:
+                        '''
+                        <MyWidget@Widget>:
+                        \tLabel:
+                        \t\ttext: 'example'
+                        '''
+                Widget:
+        Screen:
+            name: 'Exemples: kivycatalog'
+
+        Screen:
+            name: 'Exemples: garden'
+
+        Screen:
+            name: ''
