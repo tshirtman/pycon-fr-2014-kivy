@@ -1,5 +1,6 @@
 #:import color kivy.utils.get_color_from_hex
 #:import sp kivy.metrics.sp
+#:import sin math.sin
 #:set title_color '009688'
 #:set title_underline 'b2dfdb'
 #:set subtitle_color '00bcd4'
@@ -35,7 +36,7 @@
 
 <ContentLabel@Label>:
     color: color(content_color)
-    font_size: sp(30)
+    font_size: sp(24)
     size: self.texture_size
     size_hint_y: None
     font_name: 'LinLibertine_R.ttf'
@@ -43,8 +44,7 @@
 <CodeLabel@Label>
     code: ''
     font_name: 'UbuntuMono-R.ttf'
-    text: self.code .replace('\t', ' ' * 4)
-    # color: 1, 1, 1, 1
+    text: self.code .replace('\t', ' ' * 4)
     font_size: sp(20)
     canvas.before:
         Color:
@@ -52,8 +52,6 @@
         Rectangle:
             size: self.size
             pos: self.pos
-        # Color:
-        #     rgba: 1, 1, 1, 1
 
 
 <Spacer@Widget>
@@ -67,7 +65,7 @@ BoxLayout:
             pos: self.pos
             size: self.size
     Title:
-        text: 'Présentation Kivy - LeLoops - 19/10/2014'
+        text: 'Présentation Kivy - PyCon FR - 26/10/2014'
     SubTitle:
         text: sm.current
         PresButton:
@@ -197,7 +195,7 @@ BoxLayout:
                         def function(*args):
                         \tprint(args)
                          
-                        widget.bind(on_touch_down, function)
+                        widget.bind(on_touch_down=function)
                         '''
                 ContentLabel:
                     text: 'touch me\n'
@@ -225,7 +223,16 @@ BoxLayout:
                         possible à l'objet de réaliser des actions quand ses
                         propriétés changent de valeur.
                         '''
-                Widget:
+                CodeLabel:
+                    code:
+                        '''
+                        class ClassWithProperties(EventDispatcher):
+                        \tname = StringProperty('')
+                        \tcount = NumericProperty(0)
+                         
+                        def on_name(self, value):
+                        \tprint "my name changed to %s" % value
+                        '''
 
         Screen:
             name: 'Widgets'
@@ -271,6 +278,7 @@ BoxLayout:
                             \t\tif self.collide_point(*touch.pos):
                             \t\t\tself.active = not self.active
                             '''
+                        font_size: sp(14)
                     Widget:
                         active: False
                         on_touch_down:
@@ -305,24 +313,25 @@ BoxLayout:
                         '''
                 Widget
         Screen:
-            name: 'Layouts - 2'
+            name: 'Layouts - 2 - Hints'
             BoxLayout:
                 orientation: 'vertical'
                 ContentLabel:
                     text:
                         '''
                         La taille/position des widgets enfants d'un Layout est
-                        généralement controllée via les propriétés size_hint et
+                        généralement contrôlée via les propriétés size_hint et
                         pos_hint, qui sont relative au Layout.
                         '''
                 BoxLayout:
                     CodeLabel:
                         text:
                             '''
-                            FloatLayout:
-                            \tButton:
-                            \t\tsize_hint: .2, .1
-                            \t\tpos_hint: {'center': (.5, .5)}
+                            f = FloatLayout()
+                            f.add_widget(
+                            \tButton(
+                            \t\tsize_hint=(.2, .1),
+                            \t\tpos_hint={'center': (.5, .5)})
                             '''
                     FloatLayout:
                         Button:
@@ -333,25 +342,27 @@ BoxLayout:
                     text:
                         '''
                         La taille peut être définie arbitrairement en
-                        désactivant pos_hint dans les directions souhaités:
+                        désactivant size_hint dans les directions souhaités:
                         '''
                 BoxLayout:
                     CodeLabel:
                         text:
                             '''
-                            FloatLayout:
-                            \tButton:
-                            \t\tsize_hint_x: None
-                            \t\tsize_hint: .2, .1
-                            \t\twidth: 150
-                            \t\ttext: 'another button'
+                            f = FloatLayout()
+                            f.add_widget(
+                            \tButton(
+                            \t\tsize_hint_x=None,
+                            \t\tpos_hint={'center': (.5, .5)},
+                            \t\tsize_hint_y=.1,
+                            \t\twidth=250,
+                            \t\ttext='another button'))
                             '''
                     FloatLayout:
                         Button:
                             size_hint_x: None
                             pos_hint: {'center': (.5, .5)}
                             size_hint_y: .1
-                            width: 150
+                            width: 250
                             text: 'another button'
         Screen:
             name: 'Le language KV'
@@ -362,38 +373,16 @@ BoxLayout:
                     font_size: sp(25)
                     text:
                         '''
-                        Bien que très commode pour la logique métier, le python est peu
-                        adapté à la déclaration d'éléments d'interfaces et de leurs
-                        liaisons logiques.
-                         
-                        L'idée d'un language déclaratif est de rendre bien plus
-                        concis et lisible l'expression d'une interface. De
-                        plus, le parsing des règles permet d'automatiser les
-                        branchements de mises à jours sur les propriétés
-                        utilisés dans leur déclaration.
-                         
-                        Cette concision d'expression est surtout payante l'ors
-                        de l'imbrication de widgets, avec des dépendances de
-                        comportement ou de représentation à divers niveaux.
+                        Python:
+                        ‣ super pour la logique
+                        ‣ moins pour la déclaration d'arbres de widgets.
+
+                        Kv:
+                        ‣ Syntaxe déclarative
+                        ‣ Détection des dépendances et créations de
+                           branchements automatiques
                         '''
                 BoxLayout:
-                    CodeLabel:
-                        text:
-                            '''
-                            Widget:
-                            \tcanvas:
-                            \t\tColor:
-                            \t\t\trgba: 1, 0, 1, 1
-                            \t\tRectangle:
-                            \t\t\tpos: self.pos
-                            \t\t\tsize: self.size
-                            '''
-                    ContentLabel:
-                        text: 'vs'
-                        size_hint_x: None
-                        width: self.texture_size[0] * 2
-                        pos_hint: {'center_y': .5}
-
                     CodeLabel:
                         text:
                             '''
@@ -406,15 +395,30 @@ BoxLayout:
                             \trect.size = w.size
                             w.bind(pos=update, size=update)
                             '''
+                    ContentLabel:
+                        text: 'vs'
+                        size_hint_x: None
+                        width: self.texture_size[0] * 2
+                        pos_hint: {'center_y': .5}
+                    CodeLabel:
+                        text:
+                            '''
+                            Widget:
+                            \tcanvas:
+                            \t\tColor:
+                            \t\t\trgba: 1, 0, 1, 1
+                            \t\tRectangle:
+                            \t\t\tpos: self.pos
+                            \t\t\tsize: self.size
+                            '''
         Screen:
-            name: 'Le language KV - 2'
+            name: 'Le language KV - 2 - Bindings'
 
-            BoxLayout:
-                orientation: 'vertical'
+            GridLayout:
+                cols: 2
                 ContentLabel:
                     text:
                         '''
-                        Binding depuis kv:
                         1. Callback:
                         '''
                 CodeLabel:
@@ -428,6 +432,8 @@ BoxLayout:
                         \ton_press:
                         \t\tprint("I've been pressed")
                         '''
+                Widget
+                Widget
                 ContentLabel:
                     text:
                         '''
@@ -443,20 +449,17 @@ BoxLayout:
                         \t\t\tsize: self.size
                         '''
         Screen:
-            name: 'Le language KV - 3'
+            name: 'Le language KV - 3 - règles'
             GridLayout:
                 # orientation: 'vertical'
                 cols: 2
                 ContentLabel:
-                    font_size: 30
                     text:
                         '''
-                        Règles et classes dynamiques:
-
-                        2 types de règles:
-                        ‣ root rule: une seule permise dans un fichier à parser,
-                        sera retourné comme widget de base par le parseur
+                        ‣ root rule: Ce qui sera retourné par le loader
+                           une seule autorisé.
                         '''
+                    text_size: self.size
                 CodeLabel:
                     size_hint_x: .5
                     text:
@@ -467,13 +470,12 @@ BoxLayout:
                         '''
 
                 ContentLabel:
-                    font_size: 30
                     text:
                         '''
-                        ‣ widget rule: Autant qu'on veut, permet de déclarer la
-                        représentation/le contenus de base de toutes les
-                        instances d'une classe déclaré en python.
+                        ‣ règle de classe: permet de configurer le style et le
+                           contenus de toutes les instances d'une classe.
                         '''
+                    text_size: self.size
                 CodeLabel:
                     size_hint_x: .5
                     text:
@@ -484,14 +486,12 @@ BoxLayout:
                         '''
 
                 ContentLabel:
-                    font_size: 30
                     text:
                         '''
-                        Un cas particulier du second type, la dynamic class,
-                        permet de créer une classe spécifique du coté KV, sans
-                        la déclarer en python, simplement en déclarant
-                        l'héritage avec '@'
+                        ‣ Classes dynamiques: permet de créer une classe en KV,
+                           en déclarant l'héritage avec '@'.
                         '''
+                    text_size: self.size
 
                 CodeLabel:
                     size_hint_x: .5
@@ -501,9 +501,10 @@ BoxLayout:
                         \tLabel:
                         \t\ttext: 'example'
                         '''
+
                 Widget:
         Screen:
-            name: 'Le language KV - 4'
+            name: 'Le language KV - 4 - Identifiants'
 
             BoxLayout:
                 orientation: 'vertical'
@@ -537,8 +538,8 @@ BoxLayout:
                             '''
                             <MyWidget@BoxLayout>:
                             \tButton:
-                            \t\td: btn
-                            \t\text: 'push me'
+                            \t\tid: btn
+                            \t\ttext: 'push me'
 
                             BoxLayout:
                             \tLabel:
@@ -591,6 +592,36 @@ BoxLayout:
 
         Screen:
             name: 'Questions ?'
+
+            Label:
+                id: question
+                text: '?'
+                font_size: 50 + abs(50 * sin(app.time))
+                color: default_color
+
+                canvas.before:
+                    PushMatrix
+                    Rotate:
+                        origin: self.center
+                        angle: app.time * 50
+                canvas.after:
+                    PopMatrix
+
+        Screen:
+            name: 'Bonus: Nouveautés'
+            ContentLabel:
+                text:
+                    '''
+                    ‣ SDL2 provider (good by pygame!)
+                    ‣ ffplayer video provider (ffmpeg)
+                    ‣ EffectWidget (shaders)
+                    ‣ Window's KeyboardHeight property (android)
+                    ‣ SVG support!
+                    ‣ Rebind in kv
+                    ‣ Tesselator
+                     
+                    + nombreuses corrections et ajouts mineurs.
+                    '''
 
 <MyWidget@BoxLayout>:
     Button:
