@@ -35,7 +35,7 @@
 
 <ContentLabel@Label>:
     color: color(content_color)
-    font_size: sp(32)
+    font_size: sp(30)
     size: self.texture_size
     size_hint_y: None
     font_name: 'LinLibertine_R.ttf'
@@ -305,14 +305,64 @@ BoxLayout:
                         '''
                 Widget
         Screen:
-            name: 'Le language KV'
-
+            name: 'Layouts - 2'
             BoxLayout:
                 orientation: 'vertical'
                 ContentLabel:
                     text:
                         '''
-                        Bien que très commode pour la logique métiers, le python est peu
+                        La taille/position des widgets enfants d'un Layout est
+                        généralement controllée via les propriétés size_hint et
+                        pos_hint, qui sont relative au Layout.
+                        '''
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            FloatLayout:
+                            \tButton:
+                            \t\tsize_hint: .2, .1
+                            \t\tpos_hint: {'center': (.5, .5)}
+                            '''
+                    FloatLayout:
+                        Button:
+                            size_hint: .2, .1
+                            pos_hint: {'center': (.5, .5)}
+                            text: 'a button'
+                ContentLabel:
+                    text:
+                        '''
+                        La taille peut être définie arbitrairement en
+                        désactivant pos_hint dans les directions souhaités:
+                        '''
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            FloatLayout:
+                            \tButton:
+                            \t\tsize_hint_x: None
+                            \t\tsize_hint: .2, .1
+                            \t\twidth: 150
+                            \t\ttext: 'another button'
+                            '''
+                    FloatLayout:
+                        Button:
+                            size_hint_x: None
+                            pos_hint: {'center': (.5, .5)}
+                            size_hint_y: .1
+                            width: 150
+                            text: 'another button'
+        Screen:
+            name: 'Le language KV'
+
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    font_size: sp(25)
+                    text:
+                        '''
+                        Bien que très commode pour la logique métier, le python est peu
                         adapté à la déclaration d'éléments d'interfaces et de leurs
                         liaisons logiques.
                          
@@ -356,12 +406,49 @@ BoxLayout:
                             \trect.size = w.size
                             w.bind(pos=update, size=update)
                             '''
-                Widget
         Screen:
             name: 'Le language KV - 2'
+
             BoxLayout:
                 orientation: 'vertical'
                 ContentLabel:
+                    text:
+                        '''
+                        Binding depuis kv:
+                        1. Callback:
+                        '''
+                CodeLabel:
+                    text:
+                        '''
+                        Widget:
+                        \ton_pos:
+                        \t\tprint('my pos is %s' % self.pos)
+
+                        Button:
+                        \ton_press:
+                        \t\tprint("I've been pressed")
+                        '''
+                ContentLabel:
+                    text:
+                        '''
+                        2. Dépendance:
+                        '''
+                CodeLabel:
+                    text:
+                        '''
+                        Widget:
+                        \tcanvas.before:
+                        \t\tRectangle:
+                        \t\t\tpos: self.pos
+                        \t\t\tsize: self.size
+                        '''
+        Screen:
+            name: 'Le language KV - 3'
+            GridLayout:
+                # orientation: 'vertical'
+                cols: 2
+                ContentLabel:
+                    font_size: 30
                     text:
                         '''
                         Règles et classes dynamiques:
@@ -371,6 +458,7 @@ BoxLayout:
                         sera retourné comme widget de base par le parseur
                         '''
                 CodeLabel:
+                    size_hint_x: .5
                     text:
                         '''
                         MyWidget:
@@ -379,6 +467,7 @@ BoxLayout:
                         '''
 
                 ContentLabel:
+                    font_size: 30
                     text:
                         '''
                         ‣ widget rule: Autant qu'on veut, permet de déclarer la
@@ -386,6 +475,7 @@ BoxLayout:
                         instances d'une classe déclaré en python.
                         '''
                 CodeLabel:
+                    size_hint_x: .5
                     text:
                         '''
                         <Widget>:
@@ -394,6 +484,7 @@ BoxLayout:
                         '''
 
                 ContentLabel:
+                    font_size: 30
                     text:
                         '''
                         Un cas particulier du second type, la dynamic class,
@@ -403,6 +494,7 @@ BoxLayout:
                         '''
 
                 CodeLabel:
+                    size_hint_x: .5
                     text:
                         '''
                         <MyWidget@Widget>:
@@ -411,10 +503,96 @@ BoxLayout:
                         '''
                 Widget:
         Screen:
+            name: 'Le language KV - 4'
+
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        utilisation de id et ids pour référencer d'autres widgets
+                        '''
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            BoxLayout:
+                            \torientation: 'vertical'
+                            \tTextInput:
+                            \t\tid: ti
+                            \tLabel:
+                            \t\ttext: ti.text
+                            '''
+                    BoxLayout:
+                        orientation: 'vertical'
+                        TextInput:
+                            id: ti_
+                        Label:
+                            color: default_color
+                            text: ti_.text
+                Widget
+                BoxLayout:
+                    CodeLabel:
+                        text:
+                            '''
+                            <MyWidget@BoxLayout>:
+                            \tButton:
+                            \t\td: btn
+                            \t\text: 'push me'
+
+                            BoxLayout:
+                            \tLabel:
+                            \t\ttext: box.ids.btn.state
+                            \tMyWidget:
+                            \t\tid: box
+                            '''
+                    BoxLayout:
+                        MyWidget:
+                            id: box
+                        Label:
+                            color: default_color
+                            text: box.ids.btn.state
+
+        Screen:
             name: 'Exemples: kivycatalog'
 
+        Screen:
+            name: 'Outils'
+            ContentLabel:
+                font_size: sp(25)
+                text:
+                    '''
+                    Kivy vient avec un certains nombre d'outils pour faciliter
+                    le développement, les connaitre peut vous faire gagner
+                    beaucoup de temps.
+
+                    ‣ Modules:
+                    Permette de modifier le comportement d'une application kivy:
+                    → Inspector
+                    → Monitor
+                    → Recorder
+                    → Monitor
+                    → Screen
+                    ‣ Garden
+                    Modules communautaires à importer directement dans votre
+                    projet
+                    → garden.graph
+                    → garden.pi
+                    → garden.ddd
+                    → etc…
+
+                    Partage d'un module:
+                    → Pousser sur github
+                    → Transmettre le dépot au compte kivy-garden
+                    → Vos droits seront restaurés sur le projet après transfer.
+                    '''
         Screen:
             name: 'Exemples: garden'
 
         Screen:
-            name: ''
+            name: 'Questions ?'
+
+<MyWidget@BoxLayout>:
+    Button:
+        id: btn
+        text: 'push me'
