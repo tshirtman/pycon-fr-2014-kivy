@@ -609,19 +609,22 @@ BoxLayout:
 
         Screen:
             name: 'Bonus: Nouveautés'
-            ContentLabel:
-                text:
-                    '''
-                    ‣ SDL2 provider (good by pygame!)
-                    ‣ ffplayer video provider (ffmpeg)
-                    ‣ EffectWidget (shaders)
-                    ‣ Window's KeyboardHeight property (android)
-                    ‣ SVG support!
-                    ‣ Rebind in kv
-                    ‣ Tesselator
-                     
-                    + nombreuses corrections et ajouts mineurs.
-                    '''
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        ‣ SDL2 provider (good bye pygame!)
+                        ‣ ffplayer video provider (ffmpeg)
+                        ‣ EffectWidget (shaders)
+                        ‣ Window's KeyboardHeight property (android)
+                        ‣ SVG support!
+                        ‣ Rebind in kv
+                        ‣ Tesselator
+                         
+                        + nombreuses corrections et ajouts mineurs.
+                        '''
+                Widget
 
 <MyWidget@BoxLayout>:
     Button:
