@@ -9,4 +9,4 @@ Captures were taken with gnome-screenshot after the presentation, hence the time
 
 The pdf is just a call to "convert export/* export.pdf" (convert being from imagemagick).
 
-Everything is licenced unter the WTFPL.
+Everything except fonts is licenced unter the WTFPL.
