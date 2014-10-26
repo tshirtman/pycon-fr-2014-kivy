@@ -1,6 +1,7 @@
 #:import color kivy.utils.get_color_from_hex
 #:import sp kivy.metrics.sp
 #:import sin math.sin
+#:import chain itertools.chain
 #:set title_color '009688'
 #:set title_underline 'b2dfdb'
 #:set subtitle_color '00bcd4'
@@ -8,6 +9,7 @@
 #:set default_color (0, 0, 0, 1)
 #:set background_color 'e0f7fa'
 #:set content_color '000000'
+#:set font_size 35
 
 <Title@Label>
     size_hint_y: None
@@ -104,7 +106,7 @@ BoxLayout:
                         http://tangibledisplay.com
                         Développement d'interactions tangibles
                         '''
-                Widget
+                Spacer
         Screen:
             name: 'Kivy'
             BoxLayout:
@@ -245,38 +247,41 @@ BoxLayout:
                         ‣ Contient un Canvas (groupe d'instructions).
 
                         Propose un certain nombre d'évènements par défaut,
-                        notemment:
+                        notamment:
                         ‣ on_touch_down
                         ‣ on_touch_move
                         ‣ on_touch_up
-
-                        Le branchement (binding) des instructions graphiques et
-                        leur mises à jours sur les évènements (directs ou via
-                        des properties) permet de déléguer la mise à jours du
-                        widget au système d'évènement.
                         '''
+                    size_hint_y: None
+                    height: self.texture_size[1]
                 BoxLayout:
                     CodeLabel:
+                        font_size: sp(20)
                         text:
                             '''
                             class MyWidget(Widget):
-                            \tactive = BooleanProperty(False)
+                               active = BooleanProperty(False)
                              
-                            \tdef __init__(self, **kwargs):
-                            \t\tsuper(MyWidget, self).__init__(**kwargs)
-                            \t\twith self.canvas:
-                            \t\t\tColor(1, 1, 1, 1, mode='rgba')
-                            \t\t\tRectangle(pos=self.pos, size=self.size)
+                                def __init__(self, **kwargs):
+                                    super(MyWidget, self).__init__(**kwargs)
+                                    self.bind(on_pos=self.update, on_size=self.update)
+                                    with self.canvas:
+                                        self.color = Color(1, 1, 1, 1, mode='rgba')
+                                        self.rectangle = Rectangle(pos=self.pos, size=self.size)
                              
-                            \tdef on_active(self, active):
-                            \t\tif self.active:
-                            \t\t\tself.color.rgba = (.5, .5, 0, 1)
-                            \t\telse:
-                            \t\t\tself.coler.rgba = (1, 1, 1, 1)
+                                def on_active(self, active):
+                                    if self.active:
+                                        self.color.rgba = (.5, .5, 0, 1)
+                                    else:
+                                        self.coler.rgba = (1, 1, 1, 1)
                              
-                            \tdef on_touch_down(self, touch):
-                            \t\tif self.collide_point(*touch.pos):
-                            \t\t\tself.active = not self.active
+                                def update(self, *args):
+                                    self.rect.pos = self.pos
+                                    self.rect.size = self.size
+                             
+                                def on_touch_down(self, touch):
+                                    if self.collide_point(*touch.pos):
+                                        self.active = not self.active
                             '''
                         font_size: sp(14)
                     Widget:
@@ -311,7 +316,7 @@ BoxLayout:
                         ‣ StackLayout
                         ‣ etc…
                         '''
-                Widget
+                Spacer
         Screen:
             name: 'Layouts - 2 - Hints'
             BoxLayout:
@@ -329,9 +334,9 @@ BoxLayout:
                             '''
                             f = FloatLayout()
                             f.add_widget(
-                            \tButton(
-                            \t\tsize_hint=(.2, .1),
-                            \t\tpos_hint={'center': (.5, .5)})
+                                Button(
+                                    size_hint=(.2, .1),
+                                    pos_hint={'center': (.5, .5)})
                             '''
                     FloatLayout:
                         Button:
@@ -350,12 +355,12 @@ BoxLayout:
                             '''
                             f = FloatLayout()
                             f.add_widget(
-                            \tButton(
-                            \t\tsize_hint_x=None,
-                            \t\tpos_hint={'center': (.5, .5)},
-                            \t\tsize_hint_y=.1,
-                            \t\twidth=250,
-                            \t\ttext='another button'))
+                                Button(
+                                    size_hint_x=None,
+                                    pos_hint={'center': (.5, .5)},
+                                    size_hint_y=.1,
+                                    width=250,
+                                    text='another button'))
                             '''
                     FloatLayout:
                         Button:
@@ -388,11 +393,13 @@ BoxLayout:
                             '''
                             w = Widget()
                             with w.canvas:
-                            \tColor(1, 0, 1, 1, mode='rgba')
-                            \trect = Rectangle(pos=w.pos, size=w.size)
+                                Color(1, 0, 1, 1, mode='rgba')
+                                rect = Rectangle(pos=w.pos, size=w.size)
+                             
                             def update(self, *args):
-                            \trect.pos = w.pos
-                            \trect.size = w.size
+                                rect.pos = w.pos
+                                rect.size = w.size
+                             
                             w.bind(pos=update, size=update)
                             '''
                     ContentLabel:
@@ -403,13 +410,19 @@ BoxLayout:
                     CodeLabel:
                         text:
                             '''
+                            from kivy.lang import Builder
+                             
+                            KV = """
                             Widget:
-                            \tcanvas:
-                            \t\tColor:
-                            \t\t\trgba: 1, 0, 1, 1
-                            \t\tRectangle:
-                            \t\t\tpos: self.pos
-                            \t\t\tsize: self.size
+                                canvas:
+                                    Color:
+                                        rgba: 1, 0, 1, 1
+                                    Rectangle:
+                                        pos: self.pos
+                                        size: self.size
+                            """
+                             
+                            Builder.load_string(KV)
                             '''
         Screen:
             name: 'Le language KV - 2 - Bindings'
@@ -425,15 +438,15 @@ BoxLayout:
                     text:
                         '''
                         Widget:
-                        \ton_pos:
-                        \t\tprint('my pos is %s' % self.pos)
+                            on_pos:
+                                print('my pos is %s' % self.pos)
 
                         Button:
-                        \ton_press:
-                        \t\tprint("I've been pressed")
+                            on_press:
+                                print("I've been pressed")
                         '''
-                Widget
-                Widget
+                Spacer
+                Spacer
                 ContentLabel:
                     text:
                         '''
@@ -443,21 +456,22 @@ BoxLayout:
                     text:
                         '''
                         Widget:
-                        \tcanvas.before:
-                        \t\tRectangle:
-                        \t\t\tpos: self.pos
-                        \t\t\tsize: self.size
+                            canvas.before:
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
                         '''
         Screen:
             name: 'Le language KV - 3 - règles'
             GridLayout:
-                # orientation: 'vertical'
+                pos_hint: {'center': (.5, .5)}
                 cols: 2
+                spacing: 10
                 ContentLabel:
                     text:
                         '''
                         ‣ root rule: Ce qui sera retourné par le loader
-                           une seule autorisé.
+                           une seule autorisée par chaine/fichier.
                         '''
                     text_size: self.size
                 CodeLabel:
@@ -465,8 +479,8 @@ BoxLayout:
                     text:
                         '''
                         MyWidget:
-                        \tLabel:
-                        \t\ttext: 'example'
+                            Label:
+                                text: 'example'
                         '''
 
                 ContentLabel:
@@ -481,8 +495,8 @@ BoxLayout:
                     text:
                         '''
                         <Widget>:
-                        \tLabel:
-                        \t\ttext: 'example'
+                            Label:
+                                text: 'example'
                         '''
 
                 ContentLabel:
@@ -498,11 +512,9 @@ BoxLayout:
                     text:
                         '''
                         <MyWidget@Widget>:
-                        \tLabel:
-                        \t\ttext: 'example'
+                            Label:
+                                text: 'example'
                         '''
-
-                Widget:
         Screen:
             name: 'Le language KV - 4 - Identifiants'
 
@@ -511,18 +523,18 @@ BoxLayout:
                 ContentLabel:
                     text:
                         '''
-                        utilisation de id et ids pour référencer d'autres widgets
+                        Utilisation d'id et ids pour référencer d'autres widgets
                         '''
                 BoxLayout:
                     CodeLabel:
                         text:
                             '''
                             BoxLayout:
-                            \torientation: 'vertical'
-                            \tTextInput:
-                            \t\tid: ti
-                            \tLabel:
-                            \t\ttext: ti.text
+                                orientation: 'vertical'
+                                TextInput:
+                                    id: ti
+                                Label:
+                                    text: ti.text
                             '''
                     BoxLayout:
                         orientation: 'vertical'
@@ -531,21 +543,24 @@ BoxLayout:
                         Label:
                             color: default_color
                             text: ti_.text
-                Widget
+                Spacer:
+                    size_hint_y: None
+                    height: 10
+
                 BoxLayout:
                     CodeLabel:
                         text:
                             '''
                             <MyWidget@BoxLayout>:
-                            \tButton:
-                            \t\tid: btn
-                            \t\ttext: 'push me'
-
+                                Button:
+                                    id: btn
+                                    text: 'push me'
+                             
                             BoxLayout:
-                            \tLabel:
-                            \t\ttext: box.ids.btn.state
-                            \tMyWidget:
-                            \t\tid: box
+                                Label:
+                                    text: box.ids.btn.state
+                                MyWidget:
+                                    id: box
                             '''
                     BoxLayout:
                         MyWidget:
@@ -553,7 +568,154 @@ BoxLayout:
                         Label:
                             color: default_color
                             text: box.ids.btn.state
+        Screen:
+            name: 'Le language KV - 5 - directives'
 
+            GridLayout:
+                cols: 2
+                spacing: 10
+                CodeLabel:
+                    code:
+                        '''
+                        —:import sin math.sin
+                        —:import chain itertools.chain
+
+                        Widget:
+                            canvas:
+                                Color:
+                                    rgba: 0, 0, 0, 1
+                                Line:
+                                    points:
+                                        list(chain(*zip(
+                                        [self.x + x * self.width / 100.
+                                        for x in range(100)],
+                                        [self.center_y + sin(y/10.) * 100
+                                        for y in range(100)])))
+                        '''.replace('—', '#')
+
+                Widget:
+                    canvas:
+                        Color:
+                            rgba: 0, 0, 0, 1
+                        Line:
+                            points:
+                                list(chain(*zip(
+                                [self.x + x * self.width / 100. for x in range(100)],
+                                [self.center_y + sin(y/10.) * 100 for y in range(100)])))
+                CodeLabel:
+                    code:
+                        '''
+                        —:set font_size 35
+                        —:set default_color (0, 0, 0, 1)
+                         
+                        Label:
+                            font_size: font_size
+                            text: "hello world"
+                            color: default_color
+                        '''.replace('—', '#')
+                    size_hint_y: None
+                    height: self.texture_size[1]
+                Label:
+                    font_size: font_size
+                    text: "hello world"
+                    color: default_color
+                    size_hint_y: None
+                    height: self.texture_size[1]
+
+                CodeLabel:
+                    code:
+                        '''
+                        —:include somefile.kv
+                         
+                        SomeWidgetDefinedInSomeFile:
+                            text: "Hey"
+                        '''.replace('—', '#')
+                    size_hint_y: None
+                    height: self.texture_size[1]
+
+                Label:
+                    color: default_color
+                    text: 'Hey'
+                    size_hint_y: None
+                    height: self.texture_size[1]
+        Screen:
+            name: 'Application'
+            BoxLayout:
+                orientation: 'vertical'
+                ContentLabel:
+                    text:
+                        '''
+                        Deux manière de lancer une application:
+                        ‣ runTouchApp
+                         
+                        ‣ App().run()
+                        '''
+                BoxLayout:
+                    spacing: 2
+                    CodeLabel:
+                        code:
+                            '''
+                            from kivy.base import runTouchApp
+                            from kivy.uix.label import Label
+                             
+                            runTouchApp(
+                                Label(
+                                    text='hello world'))
+                            '''
+
+                    CodeLabel:
+                        code:
+                            '''
+                            from kivy.app import App
+                            from kivy.uix.label import Label
+                             
+                            class HelloWorld(App):
+                                def build(self):
+                                    return Label(
+                                        text='hello world')
+                             
+                            HelloWorld().run()
+                            '''
+        Screen:
+            name: 'Applications - 2 - avantages'
+
+            ContentLabel:
+                pos_hint: {'center': (.5, .5)}
+                text:
+                    '''
+                    ‣ App offre de nombreuses fonctions utilitaires
+                       (on_pause, on_stop, on_resume, build_config, build_settings…)
+                     
+                    ‣ App charge le fichier kv associé à la
+                       classe (convention de nommage 'HelloWorldApp →
+                       helloworld.kv) dans la methode build par défaut, et le
+                       fichier de configuration (helloworld.ini) si existant.
+                     
+                    ‣ App est un EventDispatcher → peut servir de contrôleur
+                       principal (accessible depuis kv via le mot clé "app").
+                    '''
+
+
+        Screen:
+            name: 'Utilitaires'
+
+            ContentLabel:
+                pos_hint: {'center': (.5, .5)}
+                text:
+                    '''
+                    ‣ Clock
+                       Permet de planifier des taches répétitives
+                       (schedule_interval) ou non (schedule_once)
+                    ‣ Animation
+                       Transitionne la valeur d'une NumericProperty ou
+                       ListProperty (contenant un nombre fixe de valeurs
+                       Numériques) d'une valeur à une autre, dans un temps donné,
+                       via une fonction de transition configurable.
+                    ‣ UrlRequest
+                       urllib wrapper pour simplifier le travail en arrière
+                       plan (event lors du succès/échec)
+                    etc
+                    '''
         Screen:
             name: 'Exemples: kivycatalog'
 
@@ -564,16 +726,17 @@ BoxLayout:
                 text:
                     '''
                     Kivy vient avec un certains nombre d'outils pour faciliter
-                    le développement, les connaitre peut vous faire gagner
+                    le développement, les connaître peut vous faire gagner
                     beaucoup de temps.
 
                     ‣ Modules:
-                    Permette de modifier le comportement d'une application kivy:
+                    Permettent de modifier le comportement d'une application kivy:
                     → Inspector
                     → Monitor
                     → Recorder
                     → Monitor
                     → Screen
+                     
                     ‣ Garden
                     Modules communautaires à importer directement dans votre
                     projet
@@ -581,11 +744,6 @@ BoxLayout:
                     → garden.pi
                     → garden.ddd
                     → etc…
-
-                    Partage d'un module:
-                    → Pousser sur github
-                    → Transmettre le dépot au compte kivy-garden
-                    → Vos droits seront restaurés sur le projet après transfer.
                     '''
         Screen:
             name: 'Exemples: garden'
@@ -618,13 +776,20 @@ BoxLayout:
                         ‣ ffpyplayer video provider (ffmpeg)
                         ‣ EffectWidget (shaders)
                         ‣ Window's KeyboardHeight property (android)
-                        ‣ SVG support!
+                        ‣ support SVG!
                         ‣ Rebind in kv
                         ‣ Tesselator
                          
                         + nombreuses corrections et ajouts mineurs.
                         '''
-                Widget
+                Spacer
+    SubTitle:
+        text:
+            '%s/%s - %s:%s' % (
+            1 + sm.screen_names.index(sm.current) if sm.current else 0,
+            len(sm.screens), int(app.time // 60), str(int(app.time %
+            60)).zfill(2))
+        font_size: sp(15)
 
 <MyWidget@BoxLayout>:
     Button:
